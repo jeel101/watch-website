@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Payment getway</title>
+	<link rel="stylesheet" type="text/css" href="css/payment.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	
+</head>
+<body>
+    {{>navbar}}
+	<div class="container">
+		<div class="left">
+			<h3>BILLING ADDRESS</h3>
+			<form>
+				Full name
+				<input type="text" name="" placeholder="Enter name">
+				Email
+				<input type="text" name="" placeholder="Enter email">
+
+				Address
+				<input type="text" name="" placeholder="Enter address">
+				
+				City
+				<input type="text" name="" placeholder="Enter City">
+				<div id="zip">
+					<label>
+						State
+						<select>
+							<option>Choose State..</option>
+							<option>Rajasthan</option>
+							<option>Hariyana</option>
+							<option>Uttar Pradesh</option>
+							<option>Madhya Pradesh</option>
+						</select>
+					</label>
+						<label>
+						Zip code
+						<input type="number" name="" placeholder="Zip code">
+					</label>
+				</div>
+			</form>
+			<div >
+	<button id="rzp-button1" class="btn">Pay</button>
+</div>
+		</div>	
+	</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{{!-- <script src="/javascript/main.js" defer></script> --}}
+
+<script>
+
+document.getElementById('rzp-button1').onclick = async function(e){
+   e.preventDefault();
+
+   window.updatetotal = async function() {
+            try {
+                const total = 500; // Replace '500' with your calculated total
+
+                return total;
+            } catch (error) {
+                console.error("Error calculating total:", error);
+                return 0; // Return a default value or handle the error accordingly
+            }
+        };
+
+		// Function to fetch the total from the cart
+     async function calculateTotalFromCart() {
+    try {
+        const total = await updatetotal(); // Assuming updatetotal returns a Promise
+        return total;
+    } catch (error) {
+        console.log("Error in calculateTotalFromCart:", error);
+        return 0; // Return a default value or handle the error accordingly
+    }
+}
+
+ try {
+                // Retrieve the total amount by calling the updatetotal function from the cart script
+                const totalPrice = await calculateTotalFromCart();
+				let response = await fetch("http://localhost:3000/payment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                amount: totalPrice,
+            })
+        });
+
+        if (response.ok) {
+            try {
+                let orderData = await response.json();
+                console.log(orderData);
+
+                const options = {
+                    "key": "rzp_test_m3lXYuLjSpzBQM",
+                    "amount": totalPrice,
+                    "currency": "INR",
+                    "name": "Watch",
+                    "description": "Test Transaction",
+                    "image": "https://example.com/your_logo",
+                    "order_id": orderData.id,
+                    "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/",
+                    "prefill": {
+                        "name": "Gaurav Kumar",
+                        "email": "gaurav.kumar@example.com",
+                        "contact": "9000090000"
+                    },
+                    "notes": {
+                        "address": "Razorpay Corporate Office"
+                    },
+                    "theme": {
+                        "color": "#2C3639"
+                    }
+                };
+				var rzp1 = new Razorpay(options);
+                rzp1.open();
+
+            } catch (error) {
+                console.log("Error parsing JSON response:", error);
+            }
+        } else {
+            console.log("Fetch request failed with status:", response.status);
+        }
+    } catch (error) {
+        console.log("Error:", error);
+    }   
+    };
+</script>
+
+</body>
+</html>
